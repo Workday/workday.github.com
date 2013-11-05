@@ -14,10 +14,14 @@ author :
   name : Workday Developers
   email : workdaydev@workday.com
   github : workdaydev
-  twitter : @WorkdayDev
+  twitter : WorkdayDev
   feedburner : feedname
 
 excerpt_separator: <!--more--> 
+
+safe: true
+lsi: false
+pygments: true
 
 # The production_url is only used when full-domain names are needed
 # such as sitemap.txt 
