@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Principles of Reactive Programming Course"
-categories: [coursesi, scala]
 tags: [scala, coursera, meetup]
 ---
 {% include JB/setup %}

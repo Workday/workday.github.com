@@ -2,7 +2,6 @@
 layout: post
 title: "Scala Exchange London 2013"
 description: "We're going to Scala Exchange"
-category: "conference"
 tags: [scala, conference]
 ---
 {% include JB/setup %}

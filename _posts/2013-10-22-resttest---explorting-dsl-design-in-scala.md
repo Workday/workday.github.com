@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "RestTest : Exploring DSL Design in Scala"
-category: "dsl"
 tags: [scala, dsl]
 ---
 {% include JB/setup %}
