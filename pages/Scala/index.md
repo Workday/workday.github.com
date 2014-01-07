@@ -53,15 +53,15 @@ Some excellent free Coursera courses are available. They are 7 weeks long, so it
 * [Scala Style Guide](http://docs.scala-lang.org/style/) - mostly naming conventions, indentation style etc.
 * [Twitter's coding standards] (http://twitter.github.com/effectivescala/)
 * ["Scala In Depth" by Joshua D. Suereth - Chapters 2+3](http://www.manning.com/suereth/) - This contains some good advice similar to "Effective Java"
-* [Zen of Python] (http://www.python.org/dev/peps/pep-0020/) - applies to your Scala code as well
+* [Zen of Python] (http://www.python.org/dev/peps/pep-0020/) - provides some good general principles for succinct coding styles, these apply equally well to Scala code
 
 # Practising Scala #  
-* We would advise beginners to start with unit-testing their existing Java code in Scala. It's a useful and non-threatening way to start getting to grips with the syntax. 
+* We would advise beginners to start with unit-testing their existing Java code in Scala. It's a useful and non-threatening way to start getting to grips with the syntax. Have a look at [ScalaTest](http://www.scalatest.org/) or [Specs2](http://etorreborre.github.io/specs2/) 
 * [Scalatron](http://scalatron.github.com/) a programming game that can help with learning Scala  
 * Some puzzles that can be useful as well - [Ninety-Nine Scala Problems](http://aperiodic.net/phil/scala/s-99/)
 
 # Functional Programming # 
 
-* [Introdduction to Functional Programming] (http://jsuereth.com/intro-to-fp)  
+* [Introduction to Functional Programming] (http://jsuereth.com/intro-to-fp)  
   This is an excellent presentation that shows how functional programming simplifies using APIs and Futures
 
