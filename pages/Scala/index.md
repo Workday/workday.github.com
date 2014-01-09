@@ -40,7 +40,7 @@ Here are some resources our developers use when learning Scala. If you have sugg
 
 # Scala Courses # 
 
-Some excellent free Coursera courses are available. They are 7 weeks long, so it's a commitment, but worth it. Start with the Functioanl Programming Principles - this teaches functional programming through Scala.  
+Some excellent free Coursera courses are available. They are 7 weeks long, so it's a commitment, but worth it. Start with the Functional Programming Principles - this teaches functional programming through Scala.  
 
 * [Functional Programming Principles in Scala](https://class.coursera.org/progfun-2012-001)
 * [Principles of Reactive Programming](https://class.coursera.org/reactive-001) 
