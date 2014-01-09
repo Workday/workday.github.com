@@ -26,6 +26,7 @@ Here are some resources our developers use when learning Scala. If you have sugg
 * [Typesafe](http://typesafe.com/) - the company behind the Scala hivemind - provides commercial support, courses and the Typesafe Stack (scala + akka + play + spray + slick, etc ). 
 * [Twitter Scala School](http://twitter.github.com/scala_school/)
 * [Java to Scala cheatsheet](http://techblog.realestate.com.au/java-to-scala-cheatsheet/)
+* [The Neophyte's Guide to Scala](http://danielwestheide.com/scala/neophytes.html) - for beginners ready to delve a bit deeper. 
 * [StackOverflow Scala Wiki](http://stackoverflow.com/tags/scala/info)
 * [Scala Types of Types](http://ktoso.github.io/scala-types-of-types/) - good overview of different types in Scala
 
