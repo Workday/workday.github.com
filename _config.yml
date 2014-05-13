@@ -17,6 +17,8 @@ author :
   twitter : WorkdayDev
   feedburner : feedname
 
+markdown: kramdown
+
 excerpt_separator: <!--more--> 
 
 safe: true

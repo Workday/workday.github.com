@@ -2,15 +2,15 @@
 layout: post
 title: "Scala Meetup San Francisco April"
 description: ""
-category: "Scala"
-tags: [Scala, Meetup]
+category: "Meetup"
+tags: [scala, meetup]
 ---
 {% include JB/setup %}
 
 
 Workday will be hosting a Scala Meetup at the SF office this Friday, April 11th.
 
-**Title: Reactive All the Way Down, Part 2 of 2 **
+**Title: Reactive All the Way Down, Part 2 of 2**
 
 **Description:**
 
