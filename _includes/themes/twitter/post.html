@@ -5,7 +5,10 @@
 <div class="row-fluid post-full">
   <div class="span12">
     <div class="date">
-      <span>{{ page.date | date_to_long_string }}</span>
+      <table><tr><td valign="center"><td><span>{{ page.date | date_to_long_string }}</span> &nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+     <a href="https://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+	</td></tr></table>
     </div>
     <div class="content">
       {{ content }}
@@ -18,6 +21,7 @@
       {% include JB/categories_list %}
     </ul>
   {% endunless %}  
+
 
   {% unless page.tags == empty %}
     <ul class="tag_box inline">
