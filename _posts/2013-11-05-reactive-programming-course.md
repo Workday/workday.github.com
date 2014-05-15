@@ -15,4 +15,3 @@ If you are interested there's still time to sign up for the course, the first vi
 
 If you are in Dublin, Ireland - we are planning a study group at the [Dublin Scala Meetup](http://www.meetup.com/Dublin-Scala-users-group/events/142429672/) - come along and join us - all welcome. 
 
-<!--more-->

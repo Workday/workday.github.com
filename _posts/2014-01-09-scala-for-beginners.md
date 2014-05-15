@@ -28,6 +28,7 @@ While these are all good reasons, we've noticed a tangible change in developers 
 
 > Learn to love your code (again)
 
+<!--more-->  
 We've all struggled with masses of code. It's a drag. Coding in Scala can be fun. Well thought out Scala code allows you to boil away a lot of this kruft and define code which aims to clearly represent the intention of the developer (and nothing more). In practice this means developers, iteratively refine their Scala code - it becomes a kind of game. 
 
 ## Novice Stage ## 

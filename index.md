@@ -19,7 +19,12 @@ does not discuss Workday API's or how you can achieve task 'X in the Workday sys
   {% for post in site.posts %}
 <h3><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ BASE_PATH }}{{ post.url }}">{{ post.title }}</a></h3>
 <ul class="posts">
-           <p>{{ post.excerpt }}</p>
+{% if post.content contains '<!--more-->' %}
+    <p>{{ post.content | split:'<!--more-->' | first }}</p>
+    <p><a href="{{ post.url }}">Continue reading</a></p>
+{% else %}
+    <p>{{ post.content }}</p>
+{% endif %}
 </ul>
   {% endfor %}
 
