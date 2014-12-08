@@ -1,0 +1,1443 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Scala eXchange 2014 - All you don't need to know about typeclasses</title>
+
+  <meta name="description" content="What typeclasses are and how they are used in the std library. How you can build your own and obtain retroactive extension with ad-hoc polymorphism">
+  <meta name="author" content="Julien Sirocchi">
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="css/reveal.min.css">
+  <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+  <!-- For syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+
+  <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+  <script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'css/print/pdf.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+  </script>
+
+  <!--[if lt IE 9]>
+  <script src="lib/js/html5shiv.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+  <!-- Any section element inside of this container is displayed as a slide -->
+  <div class="slides">
+    <section>
+      <h3>All you don't need to know about typeclasses</h3>
+      <p>
+        <b>Scala eXchange 2014&nbsp;&nbsp;&mdash;&nbsp;&nbsp;London</b>
+      </p>
+      <p>
+        <small>Julien Sirocchi&nbsp;<a href="http://twitter.com/jsirocchi">@jsirocchi</a></small>
+      </p>
+    </section>
+
+   <section>
+      <img width="200" height="133" style="border: 0; box-shadow: 0 0 0; background-color: transparent" src="images/workday.png"/>
+      <p>
+        Senior Software Developer @ Workday<br/>
+        Scala, Akka, Play and Spray are in the Grid's team current toolbox<br/>
+        <br/>
+        Follow us on Twitter&nbsp;<a href="http://twitter.com/WorkdayDev">@WorkdayDev</a>&nbsp;and
+        checkout also our blog&nbsp;<a href="https://workday.github.io/">workday.github.io</a><br/>        
+      </p>
+
+      <aside class="notes">
+        <small>
+          I'm a Senior Software Developer at Workday where we use Scala on a daily basis,
+          a language we embraced about four years ago.<br/>
+          Within Workday, I am involved with the Grid team and our current technology toolbox
+          includes Scala, Akka, Play and Spray but we are open in evaluating other technologies
+          and libraries as we see fit for them or as they become more mature and stable.
+        </small>
+      </aside>
+    </section>
+
+    <section>
+      <h3>So we'll start with some definitions, right?</h3>
+      <p class="fragment">
+        No, not really
+      </p>
+      <p class="fragment">
+        This talk is more a distilled narration of the long journey that I've experienced while
+        discovering typeclasses in Scala
+      </p>
+    </section>
+
+    <section>
+      <section>
+        <h3>First encounters...</h3>
+        <p>
+          <pre><code data-trim>
+scala> val sorted = List(3, 1, 4, 2).sorted
+sorted: List[Int] = List(1, 2, 3, 4)
+          </code></pre>
+        </p>
+        <dl style="text-align: left" class="fragment">
+          <dt>How is this achieved?</dt>
+          <dd>
+            <ul>
+              <li>
+                <code>Int extends java.lang.Comparable[Int]</code>?
+              </li>
+              <li>
+                Does <code>sorted</code> work for
+                <strong style="text-decoration: underline">any type</strong>
+                of element <code>A</code> in a <code>List[A]</code>?
+              </li>
+            </ul>
+          </dd>
+        </dl>
+
+        <aside class="notes">
+          <small>
+            By looking at the call site it appears that a <code>List[Int]</code>
+            has some intrinsic knowledge about the ordering of its <code>Int</code>
+            elements!<br/>
+            Coming from OOP: It must be a method available on <code>List[Int]</code>
+            as <code>Int</code> must be extending <code>java.lang.Comparable[Int]</code>,
+            or, more refined, it must be a method available on any <code>List[A]</code>
+            as long as <code>A extends java.lang.Comparable[A]</code><br/>
+            Can we call <code>sorted</code> on any <code>List[A]</code>?<br/>
+            If so, how does that work?
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Hypothesis #1</h3>
+        <strong><code>Int extends java.lang.Comparable[Int]</code></strong>
+        <p>
+          From the Scala 2.11.4 source code:
+          <pre><code data-trim>
+/** `Int`, a 32-bit signed integer (equivalent to Java's `int` primitive type) is a
+ *  subtype of [[scala.AnyVal]]. Instances of `Int` are not
+ *  represented by an object in the underlying runtime system.
+ *
+ *  There is an implicit conversion from [[scala.Int]] => [[scala.runtime.RichInt]]
+ *  which provides useful non-primitive operations.
+ */
+final abstract class Int private extends AnyVal {
+  // a bunch of abstract definitions to follow...
+}
+          </code></pre>
+        </p>
+        <p class="fragment">
+          No polymorphism by <i>inheritance</i> here...
+        </p>
+      </section>
+
+      <section>
+        <h3>Hypothesis #2&nbsp;&mdash;&nbsp;1/2</h3>
+        <strong>Using <code>sorted</code> on any <code>List[A]</code></strong>
+        <p>
+          Define some custom type <code>A</code>
+        </p>
+        <p>
+          <pre><code data-trim>
+scala> case class MyClass(x: Int)
+defined class MyClass
+          </code></pre>
+        </p>
+
+        <aside class="notes">
+          <small>
+            And now our task is to try sorting a <code>List[MyClass]</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Hypothesis #2&nbsp;&mdash;&nbsp;2/2</h3>
+        <p>
+          Invoking <code>sorted</code> on a <code>List[MyClass]</code>
+        </p>
+        <p>
+          <pre><code data-trim>
+scala> val sorted = List(MyClass(2), MyClass(1), MyClass(3)).sorted
+          </code></pre>
+          <pre class="fragment"><code data-trim>
+&lt;console&gt;:9: error: No implicit Ordering defined for MyClass.
+      val sorted = List(MyClass(2), MyClass(1), MyClass(3)).sorted
+          </code></pre>
+        </p>
+        <p class="fragment">
+          <span style="color: red"><b>...fails to even compile!</b></span>
+        </p>
+
+        <aside class="notes">
+          <small>
+            But, wait! What is that "No implicit Ordering defined for MyClass"
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Source to the rescue!</h3>
+        <p>
+          <code>sorted</code> method defined in <code>SeqLike[+A, +Repr]</code>
+        </p>
+        <p>
+          <pre><code data-trim>
+def sorted[B >: A](implicit ord: Ordering[B]): Repr
+          </code></pre>
+        </p>
+        <dl style="text-align: left" class="fragment">
+          <dt>Note:</dt>
+          <dd>
+            <ul>
+              <li>
+                <code>sorted</code> <i>does</i> take a parameter, which can be <i>implicitly</i>
+                provided
+              </li>
+              <li>
+                some polymorphic relationship between <code>B</code> and <code>Ordering[B]</code>
+              </li>
+            </ul>
+          </dd>
+        </dl>
+
+        <aside class="notes">
+          <small>
+            This explains why at call site we do not see any parameter passed into
+            our <code>sorted</code> function!<br/>
+            To be a bit more exact it takes a single parameter list with one single
+            parameter which will be looked up first (by the compiler) in the current
+            implicit scope.<br/>
+            More things to note: why <code>SeqLike</code> takes two type parameters,
+            why both are covariant and why <code>sorted</code> is defined for <code>B >: A</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Quick detour on implicits</h3>
+        <p class="fragment">
+          <code>implicit</code> is a keyword
+        </p>
+        <dl class="fragment">
+          <dt>Types:</dt>
+          <dd>
+            <ul>
+              <li>
+                conversions
+              </li>
+              <li>
+                parameters
+              </li>
+            </ul>
+          </dd>
+        </dl>
+      </section>
+
+      <section>
+        <h3>implicit conversions</h3>
+        <dl>
+          <dt>Two subtypes:</dt>
+          <dd>
+            Conversion to an expected type
+            <pre class="fragment"><code data-trim>
+case class Person(name: String)
+def hi(p: Person): String = s"""Hello ${p.name}!"""
+implicit def string2person(s: String): Person = Person(s)
+
+scala> hi("Julien")
+res0: String = Hello Julien!
+            </code></pre>
+          </dd>
+          <dd>
+            Conversion of the receiver (<i>enrich-my-library</i> pattern)
+            <pre class="fragment"><code data-trim>
+implicit class Person(val name: String) {
+  def greetMe: String = s"""Hello $name!"""
+}
+
+scala> "Julien".greetMe
+res0: String = Hello Julien!
+            </code></pre>
+          </dd>
+        </dl>
+      </section>
+
+      <section>
+        <h3>implicit parameters</h3>
+        <pre><code data-trim>
+def add(a1: Int)(implicit a2: Int) = a1 + a2
+implicit val one: Int = 1
+
+scala> add(22)
+res0: Int = 23
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            Using a raw value is not that useful, but it still serves the purpose of
+            explaining the implicit parameter
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Back to the investigation</h3>
+        <p>
+          <code>Ordering[T]</code> definition:
+          <pre><code data-trim>
+@annotation.implicitNotFound(msg = "No implicit Ordering defined for ${T}.")
+trait Ordering[T] extends Comparator[T] with PartialOrdering[T]
+  with Serializable {
+  // implementation
+}
+          </code></pre>
+        </p>
+        <dl style="text-align: left" class="fragment">
+          <dt>Note:</dt>
+          <dd>
+            <ul>
+              <li>
+                <code>Ordering[T] extends java.util.Comparator[T]</code>
+              </li>
+              <li>
+                <code>@implicitNotFound</code> is what is generating the error message
+                we saw earlier
+              </li>
+            </ul>
+          </dd>
+        </dl>
+      </section>
+
+      <section>
+        <h3>Nuts & bolts</h3>
+        <p>
+          <ul>
+            <li class="fragment">
+              <code>Ordering[Int]</code> argument was implicitly provided
+            </li>
+            <li class="fragment">
+              <code>Ordering[Int]</code> is used by <code>sorted</code> to
+              sort <code>Int</code> elements
+            </li>
+            <li class="fragment">
+              If we can provide an <code>Ordering[A]</code> we can sort <i>any</i>
+              <code>List[A]</code>
+            </li>
+          </ul>
+        </p>
+
+        <aside class="notes">
+          <small>
+            How does all this tie together?<br/>
+            When we invoked <code>sorted</code> on our <code>List[Int]</code> an instance of
+            <code>Ordering[Int]</code> must have been passed in implicitly
+          </small>
+        </aside>
+      </section>
+<!--
+      <section>
+        <h3>Implicit usage</h3>
+        <p>
+          Complete definition of <code>sorted</code> on <code>SeqLike</code>
+          <pre class="fragment"><code data-trim>
+def sorted[B >: A](implicit ord: Ordering[B]): Repr = {
+  val len = this.length
+  val arr = new ArraySeq[A](len)
+  var i = 0
+  for (x <- this) {
+    arr(i) = x
+    i += 1
+  }
+  java.util.Arrays.sort(arr.array, ord.asInstanceOf[Ordering[Object]])
+  val b = newBuilder
+  b.sizeHint(len)
+  for (x <- arr) b += x
+  b.result()
+}
+          </code></pre>
+        </p>
+      </section>
+-->
+      <section>
+        <h3>Time to sort our list!&nbsp;&mdash;&nbsp;1/2</h3>
+        <p>
+          <i>Either explicitly...</i>
+        </p>
+        <p>
+          <pre><code data-trim>
+scala> case class MyClass(x: Int)
+defined class MyClass
+
+scala> val orderingMyClass = new Ordering[MyClass] {
+     |   override def compare(first: MyClass, second: MyClass): Int =
+     |     if (first.x < second.x) -1
+     |     else if (first.x == second.x) 0
+     |     else 1
+     | }
+orderingMyClass: Ordering[MyClass] = $anon$1@3c160f0f
+
+scala> val sorted = List(MyClass(2), MyClass(1), MyClass(3))
+                    .sorted(orderingMyClass)
+sorted: List[MyClass] = List(MyClass(1), MyClass(2), MyClass(3))
+          </code></pre>
+        </p>
+        <p class="fragment">
+          <span style="color: red"><b>It works!</b></span>
+        </p>
+
+        <aside class="notes">
+          <small>
+            The implementation of our version of <code>compare</code> does not really matter,
+            as long as we can provide an instance of <code>Ordering[MyClass]</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Time to sort our list!&nbsp;&mdash;&nbsp;2/2</h3>
+        <p>
+          <i>...or implicitly</i>
+        </p>
+        <p>
+          <pre><code data-trim>
+scala> case class MyClass(x: Int)
+defined class MyClass
+
+scala> implicit val orderingMyClass = new Ordering[MyClass] {
+     |   override def compare(first: MyClass, second: MyClass): Int =
+     |     if (first.x < second.x) -1
+     |     else if (first.x == second.x) 0
+     |     else 1
+     | }
+orderingMyClass: Ordering[MyClass] = $anon$1@3c160f0f
+
+scala> val sorted = List(MyClass(2), MyClass(1), MyClass(3)).sorted
+sorted: List[MyClass] = List(MyClass(1), MyClass(2), MyClass(3))
+          </code></pre>
+        </p>
+        <p class="fragment">
+          <span style="color: red"><b>It works too!</b></span>
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Another encounter</h3>
+        <pre><code data-trim>
+scala> val sum = List(1, 2, 3).sum
+sum: Int = 6
+        </code></pre>
+        <p class="fragment">
+          Does this work similarly to <code>sorted</code>?
+        </p>
+      </section>
+
+      <section>
+        <h3>Source to the rescue!&nbsp;&mdash;&nbsp;1/2</h3>
+        <p>
+          Definition of <code>sum</code> in <code>TraversableOnce[+A]</code>
+        </p>
+        <pre><code data-trim>
+def sum[B >: A](implicit num: Numeric[B]): B = foldLeft(num.zero)(num.plus)
+        </code></pre>
+        <p class="fragment">
+          Looks familiar, uh?
+        </p>
+      </section>
+
+      <section>
+        <h3>Source to the rescue!&nbsp;&mdash;&nbsp;2/2</h3>
+        <p>
+          <code>Numeric[T]</code> definition
+          <pre><code data-trim>
+trait Numeric[T] extends Ordering[T] {
+  def plus(x: T, y: T): T
+  def fromInt(x: Int): T
+  def zero = fromInt(0)
+  // more definitions
+}
+          </code></pre>
+        </p>
+        <p class="fragment">
+          <code>Numeric[T]</code> looks very similar to <code>Ordering[T]</code><br/>
+          i.e. it works using the same machinery
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <h3>What we've learned so far</h3>
+      <p>
+        Given any type <code>A</code>, if the compiler can discover an instance of
+        <code>Ordering[A]</code>, we can use <code>A</code> in any method that implicitly
+        requires <code>Ordering[A]</code><br/>
+        <span class="fragment"><i>&mdash;&nbsp;or, in other words&nbsp;&mdash;</i><br/>
+        We can make our type <code>A</code> <i>behave as if it was an <code>Ordering[A]</code></i>
+        as long as we can implicitly provide an instance of <code>Ordering</code> for our type
+        <code>A</code>.</span>
+      </p>
+      <p class="fragment">
+        This is called <i>ad-hoc polymorphism</i> and it enables retroactive extensions.
+      </p>
+    </section>
+
+    <section>
+      <section>
+        <h3>A scarier encounter</h3>
+        <p>
+          Transforming a <code>List[MyClass]</code> into a <code>List[String]</code>.
+          <pre class="fragment current-fragment"><code data-trim>
+scala> val sortedStrings = sorted.map(instance ⇒ instance.x.toString)
+sortedStrings: List[String] = List(1, 2, 3)
+          </code></pre>
+          <span class="fragment current-fragment">Easy peasy! We all love that <code>map</code>
+            method, right?</span>
+        </p>
+        <p class="fragment">
+          Any idea of how that <code>map</code> is defined in <code>TraversableLike[+A,&nbsp;+Repr]</code>?
+          You may presume that its signature looks like
+          <pre class="fragment current-fragment"><code data-trim>
+def map[B](f: A ⇒ B): Traversable[B]
+          </code></pre>
+          <pre class="fragment current-fragment"><code data-trim>
+def map[B, That](f: A ⇒ B)(implicit bf: CanBuildFrom[Repr, B, That]): That
+          </code></pre>
+        </p>
+      </section>
+
+      <section>
+        <h3>Don't panic!</h3>
+        <p>
+          An <i>implicitly</i> available <code>CanBuildFrom[Repr, B, That]</code>?
+        </p>
+        <p class="fragment">
+          Could that be a more sophisticated variation of what we have just seen?
+        </p>
+      </section>
+
+      <section>
+        <h3>Source to the rescue again!&nbsp;&mdash;&nbsp;1/2</h3>
+        <p>
+          What is <code>Repr</code>? <code>TraversableLike[+A, +Repr]</code> defines it
+          <pre class="fragment current-fragment"><code data-trim>
+/** A template trait for traversable collections of type `Traversable[A]`.
+ *  [...]
+ *  @tparam A    the element type of the collection
+ *  @tparam Repr the type of the actual collection containing the elements.
+ *  [...]
+ */
+trait TraversableLike[+A, +Repr] // some mixins and implementation details
+          </code></pre>
+        </p>
+        <p class="fragment">
+          And, since <code>List[A]</code> is a <code>TraversableLike[A, List[A]]</code>,
+          then in our example <code>Repr</code> is <code>List[MyClass]</code>
+          <pre class="fragment current-fragment"><code data-trim>
+scala> val l = List(MyClass(2), MyClass(1), MyClass(3))
+l: List[MyClass] = List(MyClass(2), MyClass(1), MyClass(3))
+
+scala> l.isInstanceOf[collection.TraversableLike[MyClass, List[MyClass]]]
+res0: Boolean = true
+          </code></pre>
+        </p>
+
+        <aside class="notes">
+          <small>
+            <code>List[A]</code> is a <code>LinearSeqOptimized[A, List[A]]</code><br/>
+            which is a <code>LinearSeqLike[A, List[A]]</code><br/>
+            which is a <code>SeqLike[A, List[A]]</code><br/>
+            which is a <code>TraversableLike[A, List[A]]</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Source to the rescue again!&nbsp;&mdash;&nbsp;2/2</h3>
+        <p>
+          From CanBuildFrom.scala
+          <pre><code data-trim>
+/** A base trait for builder factories.
+ *
+ *  @tparam From  the type of the underlying collection that requests
+ *                a builder to be created.
+ *  @tparam Elem  the element type of the collection to be created.
+ *  @tparam To    the type of the collection to be created.
+ *  [...]
+ */
+@implicitNotFound(msg = "Cannot construct a collection of type ${To} with
+  elements of type ${Elem} based on a collection of type ${From}.")
+trait CanBuildFrom[-From, -Elem, +To] {
+  // method definitions
+}
+          </code></pre>
+        </p>
+      </section>
+
+      <section>
+        <h3>How it works&nbsp;&mdash;&nbsp;1/2</h3>
+        <p>
+          When invoking <code>map</code> there has to be an implicit
+          <code>CanBuildFrom[Repr, B, That]</code>, where:
+          <ol>
+            <li class="fragment">
+              <code>Repr</code> is inferred as <code>List[MyClass]</code>
+            </li>
+            <li class="fragment">
+              type <code>B</code> is inferred as <code>String</code>
+            </li>
+          </ol>
+        </p>
+
+        <aside class="notes">
+          <small>
+            <code>Repr</code> is essentially a constant, as we discovered that
+            <code>List[A]</code> is a <code>TraversableLike[A, List[A]]</code> and
+            we also saw that <code>TraversableLike[+A, +Repr]</code><br/>
+            Also, <code>B</code> is inferred by the explicit parameter <code>f</code>,
+            the function we supplied <code>MyClass ⇒ String</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>How it works&nbsp;&mdash;&nbsp;2/2</h3>
+        <p>
+          What is <code>That</code>? It represents the type of collection that will be
+          created. The <code>List</code> companion object defines a
+          <pre class="fragment current-fragment"><code data-trim>
+object List extends SeqFactory[List] {
+  /** $genericCanBuildFromInfo */
+  implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, List[A]] =
+    ReusableCBF.asInstanceOf[GenericCanBuildFrom[A]]
+  // rest of the implementation...
+}
+          </code></pre>
+          <span class="fragment current-fragment">Which means that we can</span>
+          <pre class="fragment current-fragment"><code data-trim>
+scala> implicitly[CanBuildFrom[List[Int], String, List[String]]]
+res0: scala.collection.generic.CanBuildFrom[List[Int],String,List[String]] =
+        scala.collection.generic.GenTraversableFactory$$anon$1@28bfd1a8
+          </code></pre>
+          <span class="fragment current-fragment" style="color: red">
+            <img width="100" height="100" src="images/bazinga.jpg" alt="Bazinga!">
+          </span>
+        </p>
+
+        <aside class="notes">
+          <small>
+            <code>That</code> cannot be inferred by the explicit parameters supplied (or
+            derived from the types of the collection being used)! Functional dependency!
+          </small>
+        </aside>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>Definition</h3>
+        <p>
+          What we've discovered so far are a couple of examples of typeclasses in Scala.
+          <blockquote style="font-size: smaller" class="fragment">
+            In computer science, a type class is a type system construct that supports ad hoc
+            polymorphism. This is achieved by adding constraints to type variables in parametrically
+            polymorphic types. Such a constraint typically involves a type class <code>T</code> and
+            a type variable <code>a</code>, and means that <code>a</code> can only be instantiated
+            to a type whose members support the overloaded operations associated with <code>T</code>.
+          </blockquote>
+        </p>
+
+        <aside class="notes">
+          <small>
+            This is one of the many definitions you can find on the web (from Wikipedia)<br/>
+            Quite a mouthful, right?
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Definition, revised</h3>
+        <p>
+          I found Daniel Westheide's explanation on his <i>The Neophyte's Guide to Scala</i> much
+          more readable
+          <blockquote style="font-size: smaller" class="fragment">
+            A type class <code>TC</code> defines some behaviour in the form of operations that must be
+            supported by a type <code>A</code> for it to be a member of type class <code>TC</code>.
+            Whether the type <code>A</code> is a member of the type class <code>TC</code> is not inherent
+            in the type. Rather, any developer can declare that a type is a member of a type class simply
+            by providing implementations of the operations the type must support. Now, once <code>A</code>
+            is made a member of the type class <code>TC</code>, functions that have constrained one or more
+            of their parameters to be members of <code>TC</code> can be called with arguments of type
+            <code>A</code>.
+          </blockquote>
+        </p>
+      </section>
+
+      <section>
+        <h3>Scala's typeclasses machinery</h3>
+        <p>
+          To carve and use your own typeclass in Scala you need to define:
+          <ol>
+            <li class="fragment">
+              Some behaviour defined in a trait, parametrised on one or more types
+            </li>
+            <li class="fragment">
+              An instance of this trait for some type <code>A</code>, which the compiler
+              can find in the implicit scope
+            </li>
+          </ol>
+        </p>
+        <p class="fragment">
+          That's it. Nothing more, really.
+        </p>
+
+        <aside class="notes">
+          <small>
+            The rest is all about implicit resolution, variance annotations, higher kinded types, etc
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Nice to haves</h3>
+        <p>
+          I'd recommend you doing:
+          <ul>
+            <li class="fragment">
+              Always stick the <code>@implicitNotFound</code> annotation on the
+              definition of your typeclass and provide a self-explanatory error message
+            </li>
+            <li class="fragment">
+              If you can provide some implicits out of the box, put them into the
+              companion object of your typeclass
+            </li>
+            <li class="fragment">
+              Use the <i>context bound</i> syntax, where applicable
+            </li>
+            <li class="fragment">
+              <img style="vertical-align: top" width="502" height="101" src="images/apply.jpg" align="Apply method on typeclass companion"/>
+              <pre class="fragment current-fragment"><code data-trim>
+trait TC[T] { def methodX(t: T): Int }
+
+// provide the following apply, so that you can write: TC[T].methodX(...)
+object TC { def apply[T : TC]: TC[T] = implicitly[TC[T]] }
+              </code></pre>
+            </li>
+          </ul>
+        </p>
+
+        <aside class="notes">
+          <small>
+            Companion object implicits are looked up w/o imports
+          </small>
+        </aside>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>An almost real-life example</h3>
+        <p>
+          Reason: need an algebra for simple expressions, which can be
+          <ul>
+            <li>evaluated</li>
+            <li>serialized into JSON</li>
+          </ul>
+        </p>
+      </section>
+<!--
+      <section>
+        <h3>Attempt #1&nbsp;&mdash;&nbsp;Definition site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+sealed trait Expression {
+  def json: String
+  def evaluate: Int
+}
+
+case class Value(value: Int) extends Expression {
+  override def json: String = s"$value"
+  override def evaluate: Int = value
+}
+
+case class Add(expr1: Expression, expr2: Expression) extends Expression {
+  override def json: String =
+    s"""{ op: "+", expr1: ${expr1.json}, expr2: ${expr2.json} }"""
+  override def evaluate: Int = expr1.evaluate + expr2.evaluate
+}
+
+case class Subtract(expr1: Expression, expr2: Expression) extends Expression {
+  override def json: String =
+    s"""{ op: "-", expr1: ${expr1.json}, expr2: ${expr2.json} }"""
+  override def evaluate: Int = expr1.evaluate - expr2.evaluate
+}
+        </code></pre>
+        <p class="fragment">
+          Just kidding
+        </p>
+      </section>
+
+      <section>
+        <h3>Attempt #1&nbsp;&mdash;&nbsp;Call site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+scala> val expression =
+     |   Add(
+     |     Subtract(
+     |       Value(10),
+     |       Value(2)
+     |     ),
+     |     Add(
+     |       Value(1),
+     |       Value(2)
+     |     )
+     |   )
+expression: Add = Add(Subtract(Value(10),Value(2)),Add(Value(1),Value(2)))
+
+scala> val jsonString = expression.json
+jsonString: String = { op: "+", expr1: { op: "-", expr1: 10, expr2: 2 }, expr2: { op: "+", expr1: 1, expr2: 2 } }
+
+scala> val evaluated = expression.evaluate
+evaluated: Int = 11
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>Attempt #2&nbsp;&mdash;&nbsp;Definition site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+trait Json { def json: String }
+trait Evaluator { def evaluate: Int }
+sealed trait Expression extends Json with Evaluator
+
+case class Value(value: Int) extends Expression {
+  override def json: String = s"$value"
+  override def evaluate: Int = value
+}
+
+case class Add(expr1: Expression, expr2: Expression) extends Expression {
+  override def json: String =
+    s"""{ op: "+", expr1: ${expr1.json}, expr2: ${expr2.json} }"""
+  override def evaluate: Int = expr1.evaluate + expr2.evaluate
+}
+
+case class Subtract(expr1: Expression, expr2: Expression) extends Expression {
+  override def json: String =
+    s"""{ op: "-", expr1: ${expr1.json}, expr2: ${expr2.json} }"""
+  override def evaluate: Int = expr1.evaluate - expr2.evaluate
+}
+        </code></pre>
+        <p class="fragment">
+          Again, just kidding! But I've seen this sort of coupling in code many many times
+        </p>
+        <p class="fragment">
+          Don't need to show call site as it is absolutely equivalent to
+          <i>Attempt #1</i>
+        </p>
+      </section>
+-->
+      <section>
+        <h3>Def on singleton w/ recursive calls&nbsp;&mdash;&nbsp;Definition site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+sealed trait Expression
+
+case class Value(value: Int) extends Expression
+case class Add(expr1: Expression, expr2: Expression) extends Expression
+case class Subtract(expr1: Expression, expr2: Expression) extends Expression
+
+object Json {
+  def json(e: Expression): String = e match {
+    case Value(value) ⇒ s"$value"
+    case Add(e1, e2) ⇒ s"""{ op: "+", expr1: ${json(e1)}, expr2: ${json(e2)} }"""
+    case Subtract(e1, e2) ⇒ s"""{ op: "-", expr1: ${json(e1)}, expr2: ${json(e2)} }"""
+  }
+}
+
+object Evaluator {
+  def evaluate(e: Expression): Int = e match {
+    case Value(value) ⇒ value
+    case Add(e1, e2) ⇒ evaluate(e1) + evaluate(e2)
+    case Subtract(e1, e2) ⇒ evaluate(e1) - evaluate(e2)
+  }
+}
+        </code></pre>
+        <p class="fragment">
+          If this code is part of a library its behaviour cannot be changed
+        </p>
+
+        <aside class="notes">
+          <small>
+            Behaviour cannot be changed w/o changing library code itself.
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Def on singleton w/ recursive calls&nbsp;&mdash;&nbsp;Call site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+scala> val expression =
+     |   Add(
+     |     Subtract(
+     |       Value(10),
+     |       Value(2)
+     |     ),
+     |     Add(
+     |       Value(1),
+     |       Value(2)
+     |     )
+     |   )
+expression: Add = Add(Subtract(Value(10),Value(2)),Add(Value(1),Value(2)))
+
+scala> val jsonString = Json.json(expression)
+jsonString: String = { op: "+", expr1: { op: "-", expr1: 10, expr2: 2 }, expr2: { op: "+", expr1: 1, expr2: 2 } }
+
+scala> val evaluated = Evaluator.evaluate(expression)
+evaluated: Int = 11
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            What if we were to introduce an ADT for JSON?
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>A JSON ADT&nbsp;&mdash;&nbsp;Definition site&nbsp;&mdash;&nbsp;1/2</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+sealed trait JsValue
+case object JsNull extends JsValue
+case class JsString(s: String) extends JsValue
+case class JsNumber(i: BigDecimal) extends JsValue
+case class JsBoolean(b: Boolean) extends JsValue
+case class JsArray(a: Seq[JsValue]) extends JsValue
+case class JsObject(m: Map[String, JsValue]) extends JsValue
+        </code></pre>
+        <p class="fragment">
+          Then we could have a <code>Json</code> singleton object responsible for converting
+          a <code>JsValue</code> into a <code>String</code>, like
+          <pre class="fragment current-fragment" style="font-size: 0.45em"><code data-trim>
+object Json {
+  def stringify(jsValue: JsValue): String = jsValue match {
+    case JsNull ⇒ "null"
+    case JsString(s) ⇒ s""""$s""""
+    case JsNumber(i) ⇒ s"$i"
+    case JsBoolean(b) ⇒ s"$b"
+    case JsArray(a) ⇒ (a map stringify).mkString("[ ", ", ", " ]")
+    case JsObject(m) ⇒
+      (for ((key, value) ← m) yield s"$key: ${stringify(value)}")
+        .mkString("{ ", ", ", " }")
+}
+          </code></pre>
+        </p>
+
+        <aside class="notes">
+          <small>
+            Note that stringify is only concerned on transforming a <code>JsValue</code>
+            into a <code>String</code> and it does so by means of recursion.<br/>
+            Add the missing bit, i.e. define a method to convert our <code>Expression</code>
+            into a <code>JsValue</code>!
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>A JSON ADT&nbsp;&mdash;&nbsp;Definition site&nbsp;&mdash;&nbsp;2/2</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+object Json {
+  def stringify(jsValue: JsValue): String = // as before
+
+  def toJson(e: Expression): JsValue = e match {
+    case Value(value) ⇒ JsNumber(value)
+    case Add(e1, e2) ⇒ JsObject {
+      Map(
+        "op" → JsString("+"),
+        "expr1" → toJson(e1),
+        "expr2" → toJson(e2)
+      )
+    }
+    case Subtract(e1, e2) ⇒ JsObject {
+      Map(
+        "op" → JsString("-"),
+        "expr1" → toJson(e1),
+        "expr2" → toJson(e2)
+      )
+    }
+  }
+}
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>A JSON ADT&nbsp;&mdash;&nbsp;Call site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+scala> val json = Json.toJson(expression)
+json: JsValue = JsObject(Map(operation -> JsString(+), expression1 -> JsObject(Map(operation -> JsString(-), expression1 -> JsNumber(10), expression2 -> JsNumber(2))), expression2 -> JsObject(Map(operation -> JsString(+), expression1 -> JsNumber(1), expression2 -> JsNumber(2)))))
+
+scala> val jsonString = Json.stringify(json)
+jsonString: String = { op: "+", expr1: { op: "-", expr1: 10, expr2: 2 }, expr2: { op: "+", expr1: 1, expr2: 2 } }
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>The Adapter Pattern (GoF) for JSON&nbsp;&mdash;&nbsp;Definition site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+trait JsonConverter[A] {
+  def convert(a: A): JsValue
+}
+
+object Json {
+  def stringify(jsValue: JsValue): String = // as before
+  def toJson[A](a: A, jsonConverter: JsonConverter[A]): JsValue = jsonConverter convert a
+}
+
+object expressionJsonConverter extends JsonConverter[Expression] {
+  override def convert(a: Expression): JsValue = a match {
+    case Value(value) ⇒ JsNumber(value)
+    case Add(e1, e2) ⇒ JsObject {
+      Map(
+        "op" → JsString("+"),
+        "expr1" → convert(e1),
+        "expr2" → convert(e2)
+      )
+    }
+    case Subtract(e1, e2) ⇒ JsObject {
+      Map(
+        "op" → JsString("-"),
+        "expr1" → convert(e1),
+        "expr2" → convert(e2)
+      )
+    }
+  }
+}
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            Separation of concerns, <code>object Json</code> now knows nothing about <code>Expression</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>The Adapter Pattern (GoF) for JSON&nbsp;&mdash;&nbsp;Call site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+scala> val json = Json.toJson(expression, expressionJsonConverter)
+json: JsValue = JsObject(Map(operation -> JsString(+), expression1 -> JsObject(Map(operation -> JsString(-), expression1 -> JsNumber(10), expression2 -> JsNumber(2))), expression2 -> JsObject(Map(operation -> JsString(+), expression1 -> JsNumber(1), expression2 -> JsNumber(2)))))
+
+scala> val jsonString = Json.stringify(json)
+jsonString: String = { op: "+", expr1: { op: "-", expr1: 10, expr2: 2 }, expr2: { op: "+", expr1: 1, expr2: 2 } }
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>The JsonConverter typeclass&nbsp;&mdash;&nbsp;Definition site</h3>
+        <p>
+          We need just to make a few modifications to promote <code>JsonConverter</code>
+          into a typeclass
+        </p>
+        <pre style="font-size: 0.45em"><code data-trim>
+@implicitNotFound("Please define an implicit JsonConverter[${A}]")
+trait JsonConverter[-A] {
+  def convert(a: A): JsValue
+}
+
+object JsonConverter {
+  def apply[T: JsonConverter]: JsonConverter[T] = implicitly[JsonConverter[T]]
+}
+
+object Json {
+  def stringify(jsValue: JsValue): String = // as before
+  def toJson[A: JsonConverter](a: A): JsValue = JsonConverter[A] convert a
+}
+        </code></pre>
+        <aside class="notes"><small>
+          Note the usage of the <code>@implicitNotFound</code> annotation<br/>
+          contravariant type <code>-A</code><br/>
+          the companion object <code>apply</code>
+        </small></aside>
+      </section>
+
+      <section>
+        <h3>The JsonConverter typeclass&nbsp;&mdash;&nbsp;Call site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+scala> implicit val conv = expressionJsonConverter
+conv: expressionJsonConverter.type = expressionJsonConverter$@4fb81683
+
+scala> val json = Json.toJson(expression)
+json: JsValue = JsObject(Map(operation -> JsString(+), expression1 -> JsObject(Map(operation -> JsString(-), expression1 -> JsNumber(10), expression2 -> JsNumber(2))), expression2 -> JsObject(Map(operation -> JsString(+), expression1 -> JsNumber(1), expression2 -> JsNumber(2)))))
+
+scala> val jsonString = Json.stringify(json)
+jsonString: String = { op: "+", expr1: { op: "-", expr1: 10, expr2: 2 }, expr2: { op: "+", expr1: 1, expr2: 2 } }
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            Note that we are back to the same level of verbosity at call site that we had in the first case!
+          </small>
+        </aside>
+      </section>
+    </section>
+
+    <section>
+      <section>
+        <h3>A more complex ADT&nbsp;&mdash;&nbsp;1/3</h3>
+        <pre><code data-trim>
+sealed trait Expression[A]
+type IntE = Expression[Int]
+
+case class IntValue(value: Int) extends IntE
+
+case class Add[E1 &lt;: IntE, E2 &lt;: IntE](expr1: E1, expr2: E2)
+  extends IntE
+
+case class Subtract[E1 &lt;: IntE, E2 &lt;: IntE](expr1: E1, expr2: E2)
+  extends IntE
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            But maybe we want to also combine these expressions together, with functions
+            that manipulate <code>Expression[Int]</code> and <code>Expression[Boolean]</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>A more complex ADT&nbsp;&mdash;&nbsp;2/3</h3>
+        <pre><code data-trim>
+type BoolE = Expression[Boolean]
+
+case class BooleanValue(value: Boolean) extends BoolE
+
+case class And[E1 &lt;: BoolE, E2 &lt;: BoolE](expr1: E1, expr2: E2)
+  extends BoolE
+
+case class Or[E1 &lt;: BoolE, E2 &lt;: BoolE](expr1: E1, expr2: E2)
+  extends BoolE
+
+case class Not[E &lt;: BoolE](expression: E) extends BoolE
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            But maybe we want to also combine these expressions together, with functions
+            that manipulate <code>Expression[Int]</code> and <code>Expression[Boolean]</code>
+          </small>
+        </aside>
+      </section>
+
+      <section>
+      <h3>A more complex ADT&nbsp;&mdash;&nbsp;3/3</h3>
+        <pre><code data-trim>
+case class LessThan[E1 &lt;: IntE, E2 &lt;: IntE](expr1: E1, expr2: E2)
+  extends BoolE
+
+case class GreaterThan[E1 &lt;: IntE, E2 &lt;: IntE](expr1: E1, expr2: E2)
+  extends BoolE
+
+case class If[P &lt;: BoolE, B1 &lt;: IntE, B2 &lt;: IntE](pred: P,
+                                                  branch1: B1,
+                                                  branch2: B2)
+  extends IntE
+        </code></pre>
+      </section>
+
+        <section>
+        <h3>JsonConverter renamed & revised</h3>
+        <pre><code data-trim>
+@implicitNotFound("Please define an implicit JsWrite[${A}]")
+trait JsWrite[A] {
+  def write(a: A): JsValue
+}
+
+object JsWrite {
+  def apply[T: JsWrite]: JsWrite[T] = implicitly[JsWrite[T]]
+}
+
+object Json {
+  def stringify(jsValue: JsValue): String = // as before
+  def toJson[A: JsWrite](a: A): JsValue = JsWrite[A] write a
+}
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            Removed contravariance, since we are going to create an implicit for each
+            of our case class
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>JsWriters&nbsp;&mdash;&nbsp;1/3</h3>
+        <pre><code data-trim>
+object JsonWriters {
+  implicit val jsWriteIntValue = new JsWrite[IntValue] {
+    override def write(intValue: IntValue): JsValue =
+      JsNumber(intValue.value)
+  }
+  implicit def jsWriteAdd[E1 &lt;: IntE : JsWrite, E2 &lt;: IntE : JsWrite] =
+    new JsWrite[Add[E1, E2]] {
+      override def write(add: Add[E1, E2]): JsValue = JsObject(Map(
+        "op" → JsString("+"),
+        "expr1" → (JsWrite[E1] write add.expr1),
+        "expr2" → (JsWrite[E2] write add.expr2)))
+    }
+  // jsWriteSubtract is similar to jsWriteAdd
+}
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            The recursion is now provided by the implicit type parameters
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>JsWriters&nbsp;&mdash;&nbsp;2/3</h3>
+        <pre><code data-trim>
+object JsonWriters {
+  implicit val jsWriteBooleanValue = new JsWrite[BooleanValue] {
+    override def write(booleanValue: BooleanValue): JsValue =
+      JsBoolean(booleanValue.value)
+  }
+  implicit def jsWriteAnd[E1 &lt;: BoolE : JsWrite, E2 &lt;: BoolE : JsWrite] =
+    new JsWrite[And[E1, E2]] {
+      override def write(and: And[E1, E2]): JsValue = JsObject(Map(
+        "op" → JsString("&"),
+        "expr1" → (JsWrite[E1] write and.expr1),
+        "expr2" → (JsWrite[E2] write and.expr2)))
+    }
+  // jsWriteOr and jsWriteNot are similar to jsWriteAnd
+}
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>JsWriters&nbsp;&mdash;&nbsp;3/3</h3>
+        <pre style="font-size: 0.50em"><code data-trim>
+object JsonWriters {
+  implicit def jsWriteLessThan[E1 &lt;: IntE : JsWrite, E2 &lt;: IntE : JsWrite] =
+    new JsWrite[LessThan[E1, E2]] {
+      override def write(lessThan: LessThan[E1, E2]): JsValue = JsObject(Map(
+        "op" → JsString("&lt;"),
+        "expr1" → (JsWrite[E1] write lessThan.expr1),
+        "expr2" → (JsWrite[E2] write lessThan.expr2)))
+    }
+  // jsWriteGreaterThan is similar to jsWriteLessThan
+  implicit def jsWrIf[P&lt;:BoolE : JsWrite, B1&lt;:IntE : JsWrite, B2&lt;:IntE : JsWrite] =
+    new JsWrite[If[P, B1, B2]] {
+      override def write(`if`: If[P, B1, B2]): JsValue = JsObject(Map(
+        "op" → JsString("if"),
+        "pred" → (JsWrite[P] write `if`.pred),
+        "branch1" → (JsWrite[B1] write `if`.branch1),
+        "branch2" → (JsWrite[B2] write `if`.branch2)))
+    }
+}
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            Can we model, as we did for JsWrite a typeclass for evaluating our expressions?
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Typeclass for Eval!</h3>
+        <pre><code data-trim>
+@implicitNotFound("Please define an implicit Eval[${A}, ${B}]")
+trait Eval[A, B] {
+  def eval(a: A): B
+}
+
+object Eval {
+  def evaluate[A, B](a: A)(implicit ev: Eval[A, B]): B = ev eval a
+}
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>Evaluators&nbsp;&mdash;&nbsp;1/3</h3>
+        <pre><code data-trim>
+object Evaluators {
+  implicit val evalIntValue = new Eval[IntValue, Int] {
+    override def eval(intValue: IntValue): Int = intValue.value
+  }
+  implicit def evalAdd[E1 &lt;: IntE, E2 &lt;: IntE](implicit evE1: Eval[E1, Int],
+                                               evE2: Eval[E2, Int]) =
+    new Eval[Add[E1, E2], Int] {
+      override def eval(add: Add[E1, E2]): Int =
+        (evE1 eval add.expr1) + (evE2 eval add.expr2)
+    }
+  // evalSubtract is similar to evalAdd 
+}
+        </code></pre>
+
+        <aside class="notes">
+          <small>
+            Notice the symmetry between <code>JsWriters</code> and <code>Expressions</code>!
+          </small>
+        </aside>
+      </section>
+
+      <section>
+        <h3>Evaluators&nbsp;&mdash;&nbsp;2/3</h3>
+        <pre style="font-size: 0.50em"><code data-trim>
+object Evaluators {
+  implicit val evalBooleanValue = new Eval[BooleanValue, Boolean] {
+    override def eval(booleanValue: BooleanValue): Boolean = booleanValue.value
+  }
+  implicit def evalAnd[E1 &lt;: BoolE, E2 &lt;: BoolE](implicit evE1: Eval[E1, Boolean],
+                                                 evE2: Eval[E2, Boolean]) =
+    new Eval[And[E1, E2], Boolean] {
+      override def eval(and: And[E1, E2]): Boolean =
+        (evE1 eval and.expr1) && (evE2 eval and.expr2)
+    }
+  // evalOr and evalNot are similar to evalAnd
+}
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>Evaluators&nbsp;&mdash;&nbsp;3/3</h3>
+        <pre style="font-size: 0.50em"><code data-trim>
+object Evaluators {
+  implicit def evalLessThan[E1 &lt;: IntE, E2 &lt;: IntE](implicit evE1: Eval[E1, Int],
+                                                    evE2: Eval[E2, Int]) =
+    new Eval[LessThan[E1, E2], Boolean] {
+      override def eval(lessThan: LessThan[E1, E2]): Boolean =
+        (evE1 eval lessThan.expr1) &lt; (evE2 eval lessThan.expr2)
+    }
+  // evalGreaterThan is similar to evalLessThan 
+  implicit def evIf[P&lt;:BoolE, B1&lt;:IntE, B2&lt;:IntE](implicit evP: Eval[P, Boolean],
+                                                  evB1: Eval[B1, Int],
+                                                  evB2: Eval[B2, Int]) =
+    new Eval[If[P, B1, B2], Int] {
+      override def eval(`if`: If[P, B1, B2]): Int =
+        if (evP eval `if`.pred) evB1 eval `if`.branch1
+        else evB2 eval `if`.branch2
+    }
+}
+        </code></pre>
+      </section>
+
+      <section>
+        <h3>Call site</h3>
+        <pre style="font-size: 0.45em"><code data-trim>
+scala> val expression =
+     |   If(
+     |     And(
+     |       LessThan( Add( Add( IntValue(2), IntValue(3) ), IntValue(4) ), IntValue(23) ),
+     |       GreaterThan( IntValue(45), IntValue(12) )
+     |     ),
+     |     Add( IntValue(2), IntValue(2) ),
+     |     IntValue(5)
+     |   )
+expression: If[And[LessThan[Add[Add[IntValue,IntValue],IntValue],IntValue],GreaterThan[IntValue,IntValue]],Add[IntValue,IntValue],IntValue] = If(And(LessThan(Add(Add(IntValue(2),IntValue(3)),IntValue(4)),IntValue(23)),GreaterThan(IntValue(45),IntValue(12))),Add(IntValue(2),IntValue(2)),IntValue(5))
+
+scala> import JsonWriters._; import Evaluators._
+scala> val json = Json.toJson(expression)
+json: JsValue = JsObject(Map(op -> JsString(if), pred -> JsObject(Map(op -> JsString(&), expr1 -> JsObject(Map(op -> JsString(<), expr1 -> JsObject(Map(op -> JsString(+), expr1 -> JsObject(Map(op -> JsString(+), expr1 -> JsNumber(2), expr2 -> JsNumber(3))), expr2 -> JsNumber(4))), expr2 -> JsNumber(23))), expr2 -> JsObject(Map(op -> JsString(>), expr1 -> JsNumber(45), expr2 -> JsNumber(12))))), branch1 -> JsObject(Map(op -> JsString(+), expr1 -> JsNumber(2), expr2 -> JsNumber(2))), branch2 -> JsNumber(5)))
+
+scala> val jsonString = Json.stringify(json)
+jsonString: String = {op: "if", pred: {op: "&", expr1: {op: "<", expr1: {op: "+", expr1: {op: "+", expr1: 2, expr2: 3}, expr2: 4}, expr2: 23}, expr2: {op: ">", expr1: 45, expr2: 12}}, branch1: {op: "+", expr1: 2, expr2: 2}, branch2: 5}
+
+scala> val result = Eval.evaluate(expression)
+result: Int = 4
+        </code></pre>
+      </section>
+    </section>
+
+    <section>
+      <h3>Summary</h3>
+      <p>
+        <ul>
+          <li class="fragment">
+            Typeclasses provide a means of adding behaviour to existing types <strong>retroactively</strong>
+            (known as <i>ad-hoc polymorphism</i>)
+          </li>
+          <li class="fragment">
+            Defined in Scala as traits w/ type parameters and implicits
+          </li>
+          <li class="fragment">
+            Implicit def/val/object required at call site
+          </li>
+          <li class="fragment">
+            Used in Scala source code and in many third party libraries
+          </li>
+          <li class="fragment">
+            Easy to implement your own, with different level of complexity that can
+            be added step by step
+          </li>
+          <li class="fragment">
+            Makes client code appear very neat and simple
+          </li>
+        </ul>
+      </p>
+
+      <aside class="notes">
+        <small>
+          Useful to make scala libraries easier to use, more powerful, more generic
+        </small>
+      </aside>
+    </section>
+
+    <section>
+      <h1>Questions?</h1>
+    </section>
+  </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+
+    theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+    transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+    // Parallax scrolling
+    // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+    // parallaxBackgroundSize: '2100px 900px',
+
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+    ]
+  });
+
+</script>
+
+</body>
+</html>
