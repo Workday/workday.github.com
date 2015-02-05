@@ -17,7 +17,7 @@ author :
   twitter : WorkdayDev
   feedburner : feedname
 
-markdown: kramdown
+markdown: redcarpet
 
 excerpt_separator: <!--more--> 
 
