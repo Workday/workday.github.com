@@ -9,7 +9,7 @@ tags: [spark, scala, bigdata]
 
 Scala is a big deal here at Workday. Like many companies we have a large Java codebase  developed over many years. Scala’s ability to seamlessly interoperate with Java code makes it easy to use Scala to build new functionality that interfaces with an existing codebase. Scala’s performance, rich type system, and emphasis on functional abstractions make it particularly well suited to big data applications.
 
-The Workday Syman team focuses on building products to help customers make sense of all the data that they have stored in the Workday system. The name Syman comes from the data normalization technology that some of us built at our startup, Identified which was acquired by Workday in 2015. There were two previous iterations of the data pipeline; the first was written in Java, and the second in Scala. Neither of these were nearly as efficient or elegant as the one we have now, and that is largely due to another core technology, Spark.
+The Workday Syman team focuses on building products to help customers make sense of all the data that they have stored in the Workday system. The name Syman comes from the data normalization technology that some of us built at our startup, Identified which was acquired by Workday in 2014. There were two previous iterations of the data pipeline; the first was written in Java, and the second in Scala. Neither of these were nearly as efficient or elegant as the one we have now, and that is largely due to another core technology, Spark.
 
 ![Hacking away on the data pipeline](/assets/scala-spark-workday/hacking_pipeline.jpg "Hacking away on the data pipeline")
 <div style="width: 100%; text-align: center;">Hacking away on the data pipeline</div>
