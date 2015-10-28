@@ -14,3 +14,5 @@ For those who couldn't make it, the video is now available [here](https://www.yo
 
 Enjoy!
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/LaOiBdrM8uo" frameborder="0" allowfullscreen></iframe>
+
