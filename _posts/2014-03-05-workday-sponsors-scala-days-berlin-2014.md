@@ -9,7 +9,6 @@ tags: [scala, conference]
 
 Workday are proud to be a [sponsor](http://scaladays.org/#sponsors) of Scala Days in Berlin 2014. 
 
-<img src="http://scaladays.org/assets/images/beer-left.svg" width="100"/>
 
 Scala Days is the 
 premier Scala conference and this year it's back in Europe. The [schedule](http://scaladays.org/#schedule) is out already and

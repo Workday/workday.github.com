@@ -12,7 +12,6 @@ Scala is a big deal here at Workday. Like many companies we have a large Java co
 The Workday Syman team focuses on building products to help customers make sense of all the data that they have stored in the Workday system. The name Syman comes from the data normalization technology that some of us built at our startup, Identified which was acquired by Workday in 2014. There were two previous iterations of the data pipeline; the first was written in Java, and the second in Scala. Neither of these were nearly as efficient or elegant as the one we have now, and that is largely due to another core technology, Spark.
 
 ![Hacking away on the data pipeline](/assets/scala-spark-workday/hacking_pipeline.jpg "Hacking away on the data pipeline")
-<div style="width: 100%; text-align: center;">Hacking away on the data pipeline</div>
 
 Spark is one of the hottest technologies in big data today. Compared to Hadoop Map-Reduce, and it’s associated libraries, Spark is quite young, but in our year of using it, we have found it to be quite stable and mature. Part of this is due to the fact that Spark’s RDD is very close to Scala’s Collection API. Mirroring Scala’s Collections API is part of what makes Spark so easy to use, even without getting to some of Spark’s higher level APIs like Spark SQL and the ML pipelines API. I’ve been quite impressed at the rate of development that the Spark core team has maintained. Even very new features have been quite stable for us so far, and a couple of them are becoming core to our products.
 

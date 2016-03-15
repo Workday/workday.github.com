@@ -32,6 +32,7 @@ The following links inspired this talk:
 * [Type Driven Development](http://www.slideshare.net/mproch/booster-conf?next_slideshow=1)
 * [More Typing, Less Testing: TDD with Static Types, Part 1](http://spin.atomicobject.com/2014/12/09/typed-language-tdd-part1/)
 * [More Typing, Less Testing: TDD with Static Types, Part 2](http://spin.atomicobject.com/2014/12/10/typed-language-tdd-part2/)
+
 <!--more-->
 
 ## Defensive programming

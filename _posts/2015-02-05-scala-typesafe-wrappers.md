@@ -20,13 +20,13 @@ So why are primitives so over used?
 
 We can strengthen primitive types by wrapping them with a simple type to encode our semantics and invariants. We verify the invariants only once when we create the value and the compiler proves they are true everywhere we use it.
 
-```scala
+~~~ scala
 class WorkerPool(
   initialSize: PositiveInt = defaultInitialSize,
   maxAllocation: StrictPercentage = defaultMaxAllocation) {
     // ...
   }
-```
+~~~
 
 For example the `WorkerPool` class uses typesafe wrappers to ensure the values passed into the constructor can be used without any extra validation.  Here the compiler ensures that `initialSize` is never negative and that `maxAllocation` is a percentage value between 0 and 100. This simplifies the implementation as `WorkerPool` does not need to validate the values. It also makes the class easier to use as you know exactly what values it supports.
 
@@ -35,7 +35,7 @@ For example the `WorkerPool` class uses typesafe wrappers to ensure the values p
 
 The simplest way to wrap a value is to use Scala case classes.
 
-```scala
+~~~ scala
 case class Email(value: String) {
   require(Email.isValid(value), s"'$value' must be a valid email address")
 }
@@ -51,7 +51,7 @@ case class PositiveInt(value: Int) {
 case class StrictPercentage(value: Int) {
   require(value >= 0 && value <= 100)
 }
-```
+~~~
 
 Pros of the case classes approach:
 
@@ -71,7 +71,7 @@ We can use scala's [AnyVal](http://docs.scala-lang.org/overviews/core/value-clas
 
 The `hashcode`, `equals` and `toString` methods provided by case classes are easy to implement for a single value.
 
-```scala
+~~~ scala
 trait WrappedValue[T] extends Any {
   def value: T
 
@@ -93,7 +93,7 @@ trait WrappedValue[T] extends Any {
 class PositiveInt(val value: Int) extends AnyVal with WrappedValue[Int] {
   require(value >= 0)  // Does not compile
 }
-```
+~~~
 
 # The constructor
 
@@ -101,7 +101,7 @@ We can address the constructor and the exceptions thrown by `require` with a pri
 
 See [The Neophyte's Guide to Scala Part 6: Error Handling With Try](http://danielwestheide.com/blog/2012/12/26/the-neophytes-guide-to-scala-part-6-error-handling-with-try.html) for more information on using `Try`.
 
-```scala
+~~~ scala
 class PositiveInt private (val value: Int) extends AnyVal with WrappedValue[Int]
 
 object PositiveInt {
@@ -115,7 +115,7 @@ object PositiveInt {
 
   def unapply(wrapped: PositiveInt): Option[Int] = Some(wrapped.value)
 }
-```
+~~~
 
 We also added a simple `unapply` method to the companion object to support case class style pattern matching.
 
@@ -123,7 +123,7 @@ We also added a simple `unapply` method to the companion object to support case 
 
 Having to define a custom companion object for every wrapped type adds a lot of boiler-plate, however this can be abstracted into a trait.  Here the `construct` and `validate` methods are abstract as are the `InnerType` and `OuterType` types.
 
-```scala
+~~~ scala
 object WrappedValue {
   trait Companion {
     type InnerType
@@ -142,11 +142,11 @@ object WrappedValue {
     def unapply(wrapped: WrappedType): Option[InnerType] = Some(wrapped.value)
   }
 }
-```
+~~~
 
 Each of the companion objects implement these abstract members to describe how to validate and build its type.
 
-```scala
+~~~ scala
 class PositiveInt private (val value: Int) extends AnyVal with WrappedValue[Int]
 
 object PositiveInt extends WrappedValue.Companion {
@@ -159,7 +159,7 @@ object PositiveInt extends WrappedValue.Companion {
     if (value < 0) Some(value + ": must be positive") else None
   }
 }
-```
+~~~
 
 # Ordering
 
@@ -167,7 +167,7 @@ One benefit of primitive types is their support for natural ordering in scala. I
 
 The implicit method `ordering` in `WrappedValue.Companion` creates an `Ordering[WrappedType]` if there is an implicit `Ordering[InnerType]`. This means that if `InnerType` can be sorted or compared, so can `OuterType`.  The implementation in `WrappedOrdering` simply delegates to `ord` the `Ordering[InnerType]` implementation.
 
-```scala
+~~~ scala
 import math.Ordering
 
 object WrappedValue {
@@ -183,34 +183,34 @@ object WrappedValue {
     }
   }
 }
-```
+~~~
 
 # Unsafe Access
 
 So far the typesafe wrapper is designed for production code.  The only way to construct one is with the `from` method that returns a `Try[WrappedType]`. This makes constructing wrapped values for tests more difficult than it should be.
 
-```scala
+~~~ scala
 "A worker pool" should "accept a default size" in {
   val initialSize = PositiveInt.from(5).get
   val workerPool = new workerPool(defaultSize = initialSize)
   // ...
 }
-```
+~~~
 
 As you can see, using the `from` method for a value that cannot fail distracts the test code. It would be nice to enable an unsafe `apply` method on the companion object; one that is only available in tests.
 
-```scala
+~~~ scala
 import PositiveInt.Unsafe._  // Enables the unsafe apply
 
 "A worker pool" should "accept a default size" in {
   val workerPool = new WorkerPool(defaultSize = PositiveInt(5))
   // ...
 }
-```
+~~~
 
 This is simple to implement using a typeclass `EnableUnsafe[WrappedType]`.  The typeclass has no body, since its only role is to enable the `apply` method.  As a result, the typeclass is only used at compile time and is a [phantom type](http://james-iry.blogspot.ie/2010/10/phantom-types-in-haskell-and-scala.html).  To enable the `apply` method in tests just import `Unsafe._`.
 
-```scala
+~~~ scala
 trait EnableUnsafe[WrappedType]
 
 object WrappedValue {
@@ -227,7 +227,7 @@ object WrappedValue {
     }
   }
 }
-```
+~~~
 
 # It's a Wrap
 
