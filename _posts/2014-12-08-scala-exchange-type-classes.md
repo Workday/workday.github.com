@@ -3,7 +3,7 @@ layout: post
 title: "Scala eXchange 2014 - All you don't need to know about typeclasses"
 description: ""
 category:
-tags: [scala, type-classes, scala-exchange, julien-sirocchi]
+tags: [scala, type-classes, scala-exchange]
 ---
 {% include JB/setup %}
 

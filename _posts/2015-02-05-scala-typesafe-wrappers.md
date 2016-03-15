@@ -3,7 +3,7 @@ layout: post
 title: "Scala Typesafe Wrappers"
 description: "Wrapping simple values to add semantics and typesafety"
 category: "Scala"
-tags: [Scala, type-safety]
+tags: [scala, type-safety]
 ---
 {% include JB/setup %}
 
