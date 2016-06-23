@@ -2,7 +2,7 @@
 layout: post
 title: "What is Serverless?"
 description: ""
-category: "Opinion"
+category: "Architecture"
 tags: [serverless, architecture]
 ---
 {% include JB/setup %}
