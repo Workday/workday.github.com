@@ -2,7 +2,7 @@
 layout: post
 title: "Scala and Spark at Workday"
 description: ""
-category: "spark"
+category: "Spark"
 tags: [spark, scala, bigdata]
 ---
 {% include JB/setup %}

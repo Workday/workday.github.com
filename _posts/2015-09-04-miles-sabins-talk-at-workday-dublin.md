@@ -2,8 +2,8 @@
 layout: post
 title: "Miles Sabin's Talk at Workday Dublin"
 description: "Scala"
-category: "scala"
-tags: []
+category: "Scala"
+tags: [scala, meetup]
 ---
 {% include JB/setup %}
 

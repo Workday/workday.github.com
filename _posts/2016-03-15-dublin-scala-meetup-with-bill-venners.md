@@ -2,7 +2,7 @@
 layout: post
 title: "Dublin Scala Meetup with Bill Venners"
 description: ""
-category: "scala"
+category: "Scala"
 tags: [scala, meetup, testing]
 ---
 {% include JB/setup %}
