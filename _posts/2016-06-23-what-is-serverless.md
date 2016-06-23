@@ -21,7 +21,7 @@ Recently, cloud platform providers like Google, Microsoft, and Amazon have begun
 
 It is yet to be determined if serverless is just another fad or will it be something that will stick around. I can see it’s applicability when it comes to encapsulating short units of work like processing an image or http request logic, but it needs to be proven whether one can successfully compose a full enterprise scale application. Personally I think you can, because given that a function is a primitive construct then you can combine primitives to make more complex constructs. I think it’s just whether or not the tooling will mature and if the community will embrace it. 
 
-To finish, my definition of serverless is the ability to write an application, deploy it, and have it automatically scale without managing the underlying infrastructure. I find that idea very appealing. 
+To finish, my definition of serverless is the ability to write an application above the abstraction level of a server, deploy it and have it automatically scale without managing the underlying infrastructure. I find that idea very appealing. 
 
 ### Further reading
  
