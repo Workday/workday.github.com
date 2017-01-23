@@ -8,8 +8,6 @@ tags: [dtrace, ruby]
 {% include JB/setup %}
 *by Tom Van Eyck, Workday Dublin*
 
-# Using DTrace to measure mutex contention in Ruby
-
 Working on Ruby code that contains a sizable number of threads can benefit from a tool that highlights which particular mutexes are the most heavily contended. After all, this type of information can be worth its weight in gold when trying to diagnose why a threaded program is running slower than expected.
 
 This is where [DTrace](http://dtrace.org/guide/preface.html) enters the picture. DTrace is a tracing framework that allows for the instrumentation of application and system internals, thereby enabling the measurement and collection of previously inaccessible metrics. DTrace makes it possible to gather a truly ridiculous amount of fine-grained information about what's happening on a computer.
