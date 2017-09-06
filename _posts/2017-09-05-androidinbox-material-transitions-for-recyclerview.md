@@ -98,16 +98,16 @@ By default all views under a parent/ancestor  with a **background** set (even
 transparent ones) will be **automatically deemed a group**. If you need to break
 them up like we here with a RecyclerView as the shared-root-white-backgrounded
 layout with transparent child Item views. You’ll need to set the layout with the
-background to .
+background to ``transitionGroup=false``.
 
 But on the other hand, since the Items are “background-less” themselves, to
-prevent an out-of-body experience you’ll need to do the **opposite** and set  on
+prevent an out-of-body experience you’ll need to do the **opposite** and set ``transitionGroup=true`` on
 the Item layouts for all the child views in that Item to move together.
 
 ### Set the children free! — Remove parent layout boundaries
 
 Items inside RecyclerViews are limited to animating inside their parent’s
-boundaries, to let the items fly over the AppBar on top, we’ll need to set  on
+boundaries, to let the items fly over the AppBar on top, we’ll need to set ``clipChildren=”false”`` on
 **all parents/ancestors** up the view hierarchy.
 
 *****
@@ -152,7 +152,7 @@ flying together. Nobody’s inbox should explode (at least not visually..)
 The *explode* effect is actually achieved by **propagation**, which delays view
 animation according to the view’s distance from the epic-center, i.e. start
 later if the item’s closer to the epic-center. As we want to just *Slide*, we
-disable Propagation by: 
+disable Propagation by: `exitTransition.setPropagation(null)`
 
 And~~ now we have the **Slide**! So smooth~
 

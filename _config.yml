@@ -19,6 +19,10 @@ author :
 
 markdown: kramdown
 
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
 excerpt_separator: <!--more--> 
 
 safe: true
@@ -72,7 +76,8 @@ JB :
   #   http://s3.amazonaws.com/yoursite/themes/watermelon
   #   /assets
   #
-  ASSET_PATH : false
+  #ASSET_PATH : false
+  ASSET_PATH : "/assets/themes/twitter"
 
   # These paths are to the main pages Jekyll-Bootstrap ships with.
   # Some JB helpers refer to these paths; change them here if needed.
