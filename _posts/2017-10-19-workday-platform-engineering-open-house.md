@@ -3,7 +3,7 @@ layout: post
 title: "Workday Platform Engineering Open House"
 description: ""
 category: ""
-tags: []
+tags: [events]
 ---
 {% include JB/setup %}
 

@@ -3,7 +3,7 @@ layout: post
 title: "ShipItCon Dublin"
 description: ""
 category: "conference"
-tags: [conference, buildeng]
+tags: [events, conference, buildeng]
 ---
 {% include JB/setup %}
 

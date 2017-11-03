@@ -3,7 +3,7 @@ layout: post
 title: "Workday Sponsors Scala Days 2014"
 description: ""
 category: "Conference"
-tags: [scala, conference]
+tags: [events, scala, conference]
 ---
 {% include JB/setup %}
 

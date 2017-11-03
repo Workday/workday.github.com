@@ -3,7 +3,7 @@ layout: post
 title: "Scala By The Bay Videos Online"
 description: ""
 category: "Conferences"
-tags: [scala, conferences]
+tags: [events, scala, conferences]
 ---
 
 Videos are now [online](http://www.scalabythebay.org/schedule.html)

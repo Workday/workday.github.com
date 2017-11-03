@@ -3,7 +3,7 @@ layout: post
 title: "Deep Learning in Production Meetup"
 description: ""
 category: "ML"
-tags: [machinelearning, deeplearning]
+tags: [events, machinelearning, deeplearning]
 ---
 {% include JB/setup %}
 

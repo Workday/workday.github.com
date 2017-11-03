@@ -3,7 +3,7 @@ layout: post
 title: "Scala Meetup San Francisco April"
 description: ""
 category: "Meetup"
-tags: [scala, meetup]
+tags: [events, scala, meetup]
 ---
 {% include JB/setup %}
 

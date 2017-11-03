@@ -3,7 +3,7 @@ layout: post
 title: "Ruby Meetup @ Workday"
 description: "next ruby meetup"
 category: "Ruby"
-tags: [ruby, meetup]
+tags: [events, ruby, meetup]
 ---
 {% include JB/setup %}
 

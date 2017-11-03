@@ -3,7 +3,7 @@ layout: post
 title: "June Meetups at Workday Dublin"
 description: "Meetup"
 category: "Meetup"
-tags: [ python, cassandra, management, functional, kats]
+tags: [ events, python, cassandra, management, functional, kats]
 ---
 {% include JB/setup %}
 

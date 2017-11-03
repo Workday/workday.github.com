@@ -3,7 +3,7 @@ layout: post
 title: "Calling All Superheroes to the Workday Booth at Grace Hopper"
 description: ""
 category: "conference"
-tags: [conference, capes4heroes]
+tags: [events, conference, capes4heroes]
 ---
 {% include JB/setup %}
 <div style="margin:auto ; width:50%">

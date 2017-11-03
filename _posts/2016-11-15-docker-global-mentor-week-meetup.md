@@ -3,7 +3,7 @@ layout: post
 title: "Docker Global Mentor Week Meetup"
 description: ""
 category: "Docker"
-tags: [Docker]
+tags: [events, docker]
 ---
 {% include JB/setup %}
 

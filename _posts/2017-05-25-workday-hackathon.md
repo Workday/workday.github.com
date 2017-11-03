@@ -3,7 +3,7 @@ layout: post
 title: "Workday Hackathon"
 description: ""
 category: "hackathon"
-tags: [hackathon, development]
+tags: [events, hackathon, development]
 ---
 {% include JB/setup %}
 What’s different about a Workday Hackathon? For one, a Jedi battles Darth Vader.    

@@ -3,7 +3,7 @@ layout: post
 title: "Functional Kats Meetup at Workday Dublin"
 description: ""
 category: "Kats"
-tags: [Kats, FP, Meetup]
+tags: [events, Kats, FP, Meetup]
 ---
 {% include JB/setup %}
 

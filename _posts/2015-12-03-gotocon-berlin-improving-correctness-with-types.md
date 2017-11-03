@@ -3,7 +3,7 @@ layout: post
 title: "GOTOCon Berlin 2015 - Improving Correctness with Types"
 description: ""
 category:
-tags: [scala, correctness, scala-days, iain-hull]
+tags: [events, scala, correctness, scala-days, iain-hull]
 ---
 {% include JB/setup %}
 
